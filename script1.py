@@ -146,9 +146,20 @@ def parseHand(hand):
 
     res = {}
 
-    header = hand[:hand.find('*** HOLE CARDS ***')]
+    pos_beg = 0
+    pos_end = hand.find('*** HOLE CARDS ***')
+
+    header = hand[pos_beg : pos_end]
+
     res = parseHeaderInfo(header)
 
+    pos_beg = hand.find('\n', pos_end) + 1
+    pos_end = hand.find('*** FLOP ***', pos_beg)
+    
+    preflop = hand[pos_beg : pos_end]
+    #preflop_actions = getPreflopActions(preflop)
+
+    
     for name in res['Players'].keys():
         print(name)
 
