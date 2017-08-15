@@ -30,12 +30,12 @@ def processFile(fileNames):
             
     return hands
 
-def getSeats(header):
+def getPlayers(header):
     """
     Return a map with info about players on each seat.
     """
 
-    seats = {}
+    players = {}
 
     max6Seats = ['BU', 'SB', 'BB', 'EP', 'MP', 'CO']
 
@@ -43,7 +43,6 @@ def getSeats(header):
     pos_end = header.find(' is the button')
     BU_pos = int(header[pos_beg : pos_end])
 
-    #print('BU in the Seat number: %s' % BU_pos)
     while (True):
         pos_beg = header.find('Seat ', pos_end)
         if pos_beg == -1:
@@ -66,13 +65,35 @@ def getSeats(header):
 
         player_stack = header[pos_beg : pos_end]
 
-        seats[player_name] = {'Pos': max6Seats[index], 'Stack': player_stack}
-        #seats[max6Seats[index]] = {'Name' : player_name, 'Stack': player_stack}
+        players[player_name] = {
+            'Pos': max6Seats[index],
+            'Stack': player_stack,
+            'Hole': '',
+            'PF_actions': [],
+            'F_actions': [],
+            'T_actions': [],
+            'R_actions': []
+        }
+
+    # now we get all info about 'Seat X' lines
+    # and it's left to handle post blinds
+
+    while (True):
+        pos_beg = header.find('\n', pos_end) + 1
+        pos_end = header.find(':', pos_beg)
+        if pos_end == -1:
+            break
+
+        post_name = header[pos_beg : pos_end]
+
+        pos_beg = pos_end + 2
+        pos_end = header.find('\n', pos_beg)
         
-    
-    #seats['BU'] = BU_pos
-    
-    return seats
+        post_action = header[pos_beg : pos_end]
+
+        players[post_name]['PF_actions'].append(post_action)
+        
+    return players
 
 def parseHeaderInfo(header):
     """
@@ -112,7 +133,7 @@ def parseHeaderInfo(header):
 
     info['Table'] = header[pos_beg : pos_end]
 
-    info['Players'] = getSeats(header)
+    info['Players'] = getPlayers(header)
     
     return info
 
@@ -126,7 +147,13 @@ def parseHand(hand):
     res = {}
 
     header = hand[:hand.find('*** HOLE CARDS ***')]
-    res['Header Info'] = parseHeaderInfo(header)
+    res = parseHeaderInfo(header)
+
+    for name in res['Players'].keys():
+        print(name)
+
+        #res['Players'][name]['PF_actions'].append(
+        
     
     return res
 
