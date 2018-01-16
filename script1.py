@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import sys
+
 def processFile(fileNames):
     """
     Using fileName opens this file,
@@ -168,13 +170,44 @@ def parseHand(hand):
     
     return res
 
-if __name__ == '__main__':
-    fileNames = ['file1.txt',
-                 'file2.txt']
-    hands = processFile(fileNames)
-    print("Processed: %s files, obtain %s hands."  % (len(fileNames), len(hands)))
+def processFile(file):
+    """
+    Using fileName opens this file,
+    and return a list of hands
+    """
 
-    x = 28
+    f = open(file, 'r')
+    data = f.read()
+    f.close()
+
+    hands = []
+    
+    beg = 0
+    end = 0
+
+    while (True):
+        beg = data.find('PokerStars', end)
+        if beg == -1:
+            break
+        end = data.find('***********', beg)
+        if end is not -1:
+            hands.append(data[beg:end])
+        else:
+            hands.append(data[beg:])
+            
+    return hands
+
+if __name__ == '__main__':
+    fileNames = sys.argv[1:]
+    print("Processing files:")
+    print("--------------------------------------")
+    hands = []
+    for file in fileNames:
+        newHands = processFile(file)
+        print('... ' + file + ': obtain %s hands' % len(newHands))
+        hands += newHands
+
+    #x = 28
     #print(hands[index])
-    print(parseHand(hands[x]))
+    #print(parseHand(hands[x]))
 
